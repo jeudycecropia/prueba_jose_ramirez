@@ -1,0 +1,160 @@
+﻿
+@section scripts {
+    <script src="@Url.Content("~/Scripts/jquery-1.6.2.js")" type="text/javascript"> </script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.8.11.min.js")" type="text/javascript"> </script>
+    <script src="@Url.Content("~/Scripts/jQuery.tmpl.js")" type="text/javascript"> </script>
+    <script type="text/javascript">
+        $(function () {
+           
+            $.getJSON(
+               "api/perfil",
+               function (data) {
+                   $.each(data,
+                       function (index, value) {
+                           $("#userTemplate").tmpl(value).appendTo("#users");
+                       }
+                   );
+                   $("#loader").hide("slow");
+                   $("#addUser").show("slow");
+               }
+           );
+            $("#addUser").submit(function () {
+                $.post(
+                    "api/login",
+                    $("#addUser").serialize(),
+                    
+                    function (value) {
+                        response = value.Token;
+                        alert(response);
+                        //$.getJSON("api/perfil/" + value.id,
+                        //         function (index, value) {
+                        //             $("#userTemplate").tmpl(value).appendTo("#users");
+                        //             $("#addUser").show("slow");
+                        //         }
+                        //      );
+                        $("#userTemplate").tmpl(value).appendTo("#users");
+                      
+                    },
+                    "json"
+                );
+                return false;
+            });
+            
+               $("#logOut").submit(function () {
+                $.ajax({
+                    url: "/api/logOut/" + Id,
+                    type: 'DELETE',
+                    cache: false,
+                    statusCode: {
+                        200: function (data) {
+                            $(this).closest("li").remove();
+                        }
+                    }
+                });
+           });
+
+            $(".removeUser").live("click", function () {
+                $.ajax({
+                    type: "DELETE",
+                    url: $(this).attr("href"),
+                    context: this,
+                    success: function () {
+                        $(this).closest("li").remove();
+                        alert('success');
+                    }
+                });
+                return false;
+            });
+            $("input[type=\"submit\"], .removeUser, .viewImage").button();
+        });
+       
+        function LouOutUser(id) {
+            $.ajax({
+                url: '/Api/LogOut/' + id,
+                type: 'DELETE',
+                success: function (data) {
+                    alert('Success');
+                },
+                error: function (data) {
+                    alert('Problem LogOut User:' + data.responseText);
+                }
+            });
+        }
+    </script>
+    <script id="userTemplate" type="text/html"> 
+        <li>
+            <p>
+                <strong> User Name:</strong> ${ UserName}
+                 <br />
+                <strong> Password:</strong> ${ Password}
+                 <br />
+                <strong> User ID:</strong> ${ Id}
+                <br />
+                <strong> Nombre:</strong> ${ Nombre }
+                <br />
+                <strong> Apellido:</strong> ${ Apellido1 }
+                <br />
+                <strong> Email:</strong> ${ Email }
+                <br />
+                <strong> Direccion:</strong> ${ Direccion }
+                
+            </p>
+            <p>
+                <a href="${ Self }" class="button small red removeUser">Remove</a>
+            </p>
+        </li>
+    </script>
+}
+<body>
+    <form method="delete" id="logOut">
+          @if (Request.IsAuthenticated)
+        {
+            <text>Hello , @(User.Identity.Name)</text>
+             <input type="submit" value="logOut" class="button small green"  onclick="LouOutUser();" />
+        }
+        else
+        { 
+             <text>Por favor auteticarse</text>
+        }
+
+    </form>
+    <form method="post" id="addUser">
+    <div class="container_16">
+ 
+    </div>
+    <div class="container_16">
+        <div class="grid_16 body-container">
+            <div class="margin grid_6 alpha">
+                <label for="UserName">
+                    User Name</label><br />
+                <input type="text" id="username" name="UserName" class="text grid_4" />
+                <br class="clear" />
+                <label for="Password">
+                    Password</label><br />
+                <input type="text" id="password" name="Password" class="text grid_4" />
+                <br class="clear" />
+                <input type="submit" value="Login" class="button small green" />
+               
+                    
+                <br />
+                <br />
+                <br class="clear" />
+                <strong id="user">@*   <label id="Label1">
+                    </label>*@ </strong>
+                <br />
+                <br class="clear" />
+                
+            </div>
+            <div class="grid_8 omega">
+                <img id="loader" src="images/ajax-loader.gif" />
+                <ul id="users" class="books">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br class="clear" />
+    <div class="footer clearfix">
+    </div>
+    </form>
+
+</body>
